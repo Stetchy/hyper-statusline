@@ -4,6 +4,8 @@ Forked from ![hyper-statusline](https://github.com/henrikdahl/hyper-statusline) 
 
 To use this, follow the below installation guide, but rename the `.env.example` file to `.env` and input both your Revolut token and the path to the Revolut CLI, or set these variables in system/user variables.
 
+`npm i hyper-statusline-revolut`
+
 ---
 
 # hyper-statusline [![hyper](https://img.shields.io/badge/Hyper-v1.3.3-brightgreen.svg)](https://github.com/zeit/hyper/releases/tag/1.3.3) [![npm](https://img.shields.io/npm/v/hyper-statusline.svg?maxAge=86400?style=flat-square)](https://www.npmjs.com/package/hyper-statusline) [![npm](https://img.shields.io/npm/dt/hyper-statusline.svg?maxAge=86400?style=flat-square)](https://www.npmjs.com/package/hyper-statusline)
