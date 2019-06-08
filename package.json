@@ -9,6 +9,11 @@
     "name": "Henrik Dahlheim",
     "email": "henrik.dahlheim@gmail.com"
   },
+  "contributors": [{
+    "name": "Riain Condon",
+    "email": "riain.condon4@mail.dcu.ie",
+    "url": "https://github.com/stetchy"
+  }],
   "files": [
     "index.js"
   ],
