@@ -1,10 +1,10 @@
 {
-  "name": "hyper-statusline",
-  "version": "1.7.6",
-  "description": "Status Line Plugin for Hyper",
+  "name": "hyper-statusline-revolut",
+  "version": "1.0.0",
+  "description": "Status Line Plugin for Hyper forked to include Revolut statuses.",
   "main": "index.js",
   "license": "MIT",
-  "repository": "henrikdahl/hyper-statusline",
+  "repository": "stetchy/hyper-statusline-revolut",
   "author": {
     "name": "Henrik Dahlheim",
     "email": "henrik.dahlheim@gmail.com"
@@ -18,7 +18,8 @@
     "hyperterm",
     "hyperterm-theme",
     "hyper-statusline",
-    "statusline"
+    "statusline",
+    "revolut"
   ],
   "dependencies": {
     "after-all-results": "^2.0.0",
