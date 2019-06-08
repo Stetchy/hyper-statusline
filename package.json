@@ -1,6 +1,6 @@
 {
   "name": "hyper-statusline-revolut",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Status Line Plugin for Hyper forked to include Revolut statuses.",
   "main": "index.js",
   "license": "MIT",
