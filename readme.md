@@ -2,7 +2,7 @@
 
 Forked from ![hyper-statusline](https://github.com/henrikdahl/hyper-statusline) and edited to add Revolut statuses using the ![Revolut API by tducret](https://github.com/tducret/revolut-python).
 
-To use this, follow the below installation guide, but rename the `.env.example` file to `.env` and input both your Revolut token and the path to the Revolut CLI.
+To use this, follow the below installation guide, but rename the `.env.example` file to `.env` and input both your Revolut token and the path to the Revolut CLI, or set these variables in system/user variables.
 
 ---
 
