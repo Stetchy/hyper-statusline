@@ -1,45 +1,53 @@
-const { shell } = require('electron');
-const { exec } = require('child_process');
-const color = require('color');
-const afterAll = require('after-all-results');
-const tildify = require('tildify');
+const {
+    shell
+} = require("electron");
+const {
+    exec
+} = require("child_process");
+const color = require("color");
+const afterAll = require("after-all-results");
+const tildify = require("tildify");
 
-exports.decorateConfig = (config) => {
-    const colorForeground = color(config.foregroundColor || '#fff');
-    const colorBackground = color(config.backgroundColor || '#000');
+exports.decorateConfig = config => {
+    const colorForeground = color(config.foregroundColor || "#fff");
+    const colorBackground = color(config.backgroundColor || "#000");
     const colors = {
         foreground: colorForeground.string(),
         background: colorBackground.lighten(0.3).string()
     };
 
     const configColors = Object.assign({
-        black: '#000000',
-        red: '#ff0000',
-        green: '#33ff00',
-        yellow: '#ffff00',
-        blue: '#0066ff',
-        magenta: '#cc00ff',
-        cyan: '#00ffff',
-        white: '#d0d0d0',
-        lightBlack: '#808080',
-        lightRed: '#ff0000',
-        lightGreen: '#33ff00',
-        lightYellow: '#ffff00',
-        lightBlue: '#0066ff',
-        lightMagenta: '#cc00ff',
-        lightCyan: '#00ffff',
-        lightWhite: '#ffffff'
-    }, config.colors);
+            black: "#000000",
+            red: "#ff0000",
+            green: "#33ff00",
+            yellow: "#ffff00",
+            blue: "#0066ff",
+            magenta: "#cc00ff",
+            cyan: "#00ffff",
+            white: "#d0d0d0",
+            lightBlack: "#808080",
+            lightRed: "#ff0000",
+            lightGreen: "#33ff00",
+            lightYellow: "#ffff00",
+            lightBlue: "#0066ff",
+            lightMagenta: "#cc00ff",
+            lightCyan: "#00ffff",
+            lightWhite: "#ffffff"
+        },
+        config.colors
+    );
 
     const hyperStatusLine = Object.assign({
-        footerTransparent: true,
-        dirtyColor: configColors.lightYellow,
-        aheadColor: configColors.blue
-    }, config.hyperStatusLine);
+            footerTransparent: true,
+            dirtyColor: configColors.lightYellow,
+            aheadColor: configColors.blue
+        },
+        config.hyperStatusLine
+    );
 
     return Object.assign({}, config, {
         css: `
-            ${config.css || ''}
+            ${config.css || ""}
             .terms_terms {
                 margin-bottom: 30px;
             }
@@ -54,7 +62,7 @@ exports.decorateConfig = (config) => {
                 font-size: 12px;
                 height: 30px;
                 background-color: ${colors.background};
-                opacity: ${hyperStatusLine.footerTransparent ? '0.5' : '1'};
+                opacity: ${hyperStatusLine.footerTransparent ? "0.5" : "1"};
                 cursor: default;
                 -webkit-user-select: none;
                 transition: opacity 250ms ease;
@@ -142,69 +150,119 @@ exports.decorateConfig = (config) => {
 
 let pid;
 let cwd;
+let balance;
+let savings;
 let git = {
-    branch: '',
-    remote: '',
+    branch: "",
+    remote: "",
     dirty: 0,
     ahead: 0
-}
+};
+
+let token = process.env.REV_TOKEN;
+let apiPath = process.env.REV_API_PATH;
+const setBalance = () => {
+    exec(
+        `cd ${apiPath} && python3 revolut_cli.py -l en --token=${token}`,
+        (err, stdout) => {
+            balance = "Balance: €" + stdout.split(",")[3];
+        }
+    );
+};
+
+const setSavings = () => {
+    exec(
+        `cd ${apiPath} && python3 revolut_cli.py -l en --token=${token}`,
+        (err, stdout) => {
+            savings = "Savings: €" + stdout.split(",")[9];
+        }
+    );
+};
 
 const setCwd = (pid, action) => {
-    if (process.platform == 'win32') {
-        let directoryRegex = /([a-zA-Z]:[^\:\[\]\?\"\<\>\|]+)/mi;
+    if (process.platform == "win32") {
+        let directoryRegex = /([a-zA-Z]:[^\:\[\]\?\"\<\>\|]+)/im;
         if (action && action.data) {
             let path = directoryRegex.exec(action.data);
-            if(path){
+            if (path) {
                 cwd = path[0];
                 setGit(cwd);
             }
         }
     } else {
-        exec(`lsof -p ${pid} | awk '$4=="cwd"' | tr -s ' ' | cut -d ' ' -f9-`, (err, stdout) => {
-            cwd = stdout.trim();
-            setGit(cwd);
-        });
+        exec(
+            `lsof -p ${pid} | awk '$4=="cwd"' | tr -s ' ' | cut -d ' ' -f9-`,
+            (err, stdout) => {
+                cwd = stdout.trim();
+                setGit(cwd);
+            }
+        );
     }
-    
 };
 
 const isGit = (dir, cb) => {
-    exec(`git rev-parse --is-inside-work-tree`, { cwd: dir }, (err) => {
+    exec(`git rev-parse --is-inside-work-tree`, {
+        cwd: dir
+    }, err => {
         cb(!err);
     });
-}
+};
 
 const gitBranch = (repo, cb) => {
-    exec(`git symbolic-ref --short HEAD || git rev-parse --short HEAD`, { cwd: repo }, (err, stdout) => {
-        if (err) {
-            return cb(err);
-        }
+    exec(
+        `git symbolic-ref --short HEAD || git rev-parse --short HEAD`, {
+            cwd: repo
+        },
+        (err, stdout) => {
+            if (err) {
+                return cb(err);
+            }
 
-        cb(null, stdout.trim());
-    });
-}
+            cb(null, stdout.trim());
+        }
+    );
+};
 
 const gitRemote = (repo, cb) => {
-    exec(`git ls-remote --get-url`, { cwd: repo }, (err, stdout) => {
-        cb(null, stdout.trim().replace(/^git@(.*?):/, 'https://$1/').replace(/[A-z0-9\-]+@/, '').replace(/\.git$/, ''));
+    exec(`git ls-remote --get-url`, {
+        cwd: repo
+    }, (err, stdout) => {
+        cb(
+            null,
+            stdout
+            .trim()
+            .replace(/^git@(.*?):/, "https://$1/")
+            .replace(/[A-z0-9\-]+@/, "")
+            .replace(/\.git$/, "")
+        );
     });
-}
+};
 
 const gitDirty = (repo, cb) => {
-    exec(`git status --porcelain --ignore-submodules -uno`, { cwd: repo }, (err, stdout) => {
-        if (err) {
-            return cb(err);
-        }
+    exec(
+        `git status --porcelain --ignore-submodules -uno`, {
+            cwd: repo
+        },
+        (err, stdout) => {
+            if (err) {
+                return cb(err);
+            }
 
-        cb(null, !stdout ? 0 : parseInt(stdout.trim().split('\n').length, 10));
-    });
-}
+            cb(null, !stdout ? 0 : parseInt(stdout.trim().split("\n").length, 10));
+        }
+    );
+};
 
 const gitAhead = (repo, cb) => {
-    exec(`git rev-list --left-only --count HEAD...@'{u}' 2>/dev/null`, { cwd: repo }, (err, stdout) => {
-        cb(null, parseInt(stdout, 10));
-    });
-}
+    exec(
+        `git rev-list --left-only --count HEAD...@'{u}' 2>/dev/null`, {
+            cwd: repo
+        },
+        (err, stdout) => {
+            cb(null, parseInt(stdout, 10));
+        }
+    );
+};
 
 const gitCheck = (repo, cb) => {
     const next = afterAll((err, results) => {
@@ -229,17 +287,17 @@ const gitCheck = (repo, cb) => {
     gitRemote(repo, next());
     gitDirty(repo, next());
     gitAhead(repo, next());
-}
+};
 
-const setGit = (repo) => {
-    isGit(repo, (exists) => {
+const setGit = repo => {
+    isGit(repo, exists => {
         if (!exists) {
             git = {
-                branch: '',
-                remote: '',
+                branch: "",
+                remote: "",
                 dirty: 0,
                 ahead: 0
-            }
+            };
 
             return;
         }
@@ -254,30 +312,34 @@ const setGit = (repo) => {
                 remote: result.remote,
                 dirty: result.dirty,
                 ahead: result.ahead
-            }
-        })
+            };
+        });
     });
-}
+};
 
-exports.decorateHyper = (Hyper, { React }) => {
+exports.decorateHyper = (Hyper, {
+    React
+}) => {
     return class extends React.PureComponent {
         constructor(props) {
             super(props);
 
             this.state = {
-                cwd: '',
-                branch: '',
-                remote: '',
+                cwd: "",
+                branch: "",
+                remote: "",
                 dirty: 0,
-                ahead: 0
-            }
+                ahead: 0,
+                balance: "",
+                savings: ""
+            };
 
             this.handleCwdClick = this.handleCwdClick.bind(this);
             this.handleBranchClick = this.handleBranchClick.bind(this);
         }
 
         handleCwdClick(event) {
-            shell.openExternal('file://'+this.state.cwd);
+            shell.openExternal("file://" + this.state.cwd);
         }
 
         handleBranchClick(event) {
@@ -285,26 +347,106 @@ exports.decorateHyper = (Hyper, { React }) => {
         }
 
         render() {
-            const { customChildren } = this.props
-            const existingChildren = customChildren ? customChildren instanceof Array ? customChildren : [customChildren] : [];
+            const {
+                customChildren
+            } = this.props;
+            const existingChildren = customChildren ?
+                customChildren instanceof Array ?
+                customChildren : [customChildren] : [];
 
-            return (
-                React.createElement(Hyper, Object.assign({}, this.props, {
-                    customInnerChildren: existingChildren.concat(React.createElement('footer', { className: 'footer_footer' },
-                        React.createElement('div', { className: 'footer_group group_overflow' },
-                            React.createElement('div', { className: 'component_component component_cwd' },
-                                React.createElement('div', { className: 'component_item item_icon item_cwd item_clickable', title: this.state.cwd, onClick: this.handleCwdClick, hidden: !this.state.cwd }, this.state.cwd ? tildify(String(this.state.cwd)) : '')
-                            )
-                        ),
-                        React.createElement('div', { className: 'footer_group' },
-                            React.createElement('div', { className: 'component_component component_git' },
-                                React.createElement('div', { className: `component_item item_icon item_branch ${this.state.remote ? 'item_clickable' : ''}`, title: this.state.remote, onClick: this.handleBranchClick, hidden: !this.state.branch }, this.state.branch),
-                                React.createElement('div', { className: 'component_item item_icon item_number item_dirty', title: `${this.state.dirty} dirty ${this.state.dirty > 1 ? 'files' : 'file'}`, hidden: !this.state.dirty }, this.state.dirty),
-                                React.createElement('div', { className: 'component_item item_icon item_number item_ahead', title: `${this.state.ahead} ${this.state.ahead > 1 ? 'commits' : 'commit'} ahead`, hidden: !this.state.ahead }, this.state.ahead)
+            return React.createElement(
+                Hyper,
+                Object.assign({}, this.props, {
+                    customInnerChildren: existingChildren.concat(
+                        React.createElement(
+                            "footer", {
+                                className: "footer_footer"
+                            },
+                            React.createElement(
+                                "div", {
+                                    className: "footer_group group_overflow"
+                                },
+                                React.createElement(
+                                    "div", {
+                                        className: "component_component component_cwd"
+                                    },
+                                    React.createElement(
+                                        "div", {
+                                            className: "component_item",
+                                            title: this.state.balance,
+                                            hidden: !this.state.balance
+                                        },
+                                        this.state.balance ? this.state.balance : ""
+                                    ),
+                                    React.createElement("div", {
+                                        className: "item_cws"
+                                    }),
+                                    React.createElement(
+                                        "div", {
+                                            className: "component_item",
+                                            title: this.state.savings,
+                                            hidden: !this.state.savings
+                                        },
+                                        this.state.savings ? this.state.savings : ""
+                                    ),
+                                    React.createElement("div", {
+                                        className: "item_cws"
+                                    }),
+                                    React.createElement(
+                                        "div", {
+                                            className: "component_item item_icon item_cwd item_clickable",
+                                            title: this.state.cwd,
+                                            onClick: this.handleCwdClick,
+                                            hidden: !this.state.cwd
+                                        },
+                                        this.state.cwd ? tildify(String(this.state.cwd)) : ""
+                                    )
+                                )
+                            ),
+                            React.createElement(
+                                "div", {
+                                    className: "footer_group"
+                                },
+                                React.createElement(
+                                    "div", {
+                                        className: "component_component component_git"
+                                    },
+                                    React.createElement(
+                                        "div", {
+                                            className: `component_item item_icon item_branch ${
+                        this.state.remote ? "item_clickable" : ""
+                      }`,
+                                            title: this.state.remote,
+                                            onClick: this.handleBranchClick,
+                                            hidden: !this.state.branch
+                                        },
+                                        this.state.branch
+                                    ),
+                                    React.createElement(
+                                        "div", {
+                                            className: "component_item item_icon item_number item_dirty",
+                                            title: `${this.state.dirty} dirty ${
+                        this.state.dirty > 1 ? "files" : "file"
+                      }`,
+                                            hidden: !this.state.dirty
+                                        },
+                                        this.state.dirty
+                                    ),
+                                    React.createElement(
+                                        "div", {
+                                            className: "component_item item_icon item_number item_ahead",
+                                            title: `${this.state.ahead} ${
+                        this.state.ahead > 1 ? "commits" : "commit"
+                      } ahead`,
+                                            hidden: !this.state.ahead
+                                        },
+                                        this.state.ahead
+                                    )
+                                )
                             )
                         )
-                    ))
-                }))
+                    )
+                })
             );
         }
 
@@ -315,7 +457,9 @@ exports.decorateHyper = (Hyper, { React }) => {
                     branch: git.branch,
                     remote: git.remote,
                     dirty: git.dirty,
-                    ahead: git.ahead
+                    ahead: git.ahead,
+                    balance: balance,
+                    savings: savings
                 });
             }, 100);
         }
@@ -326,31 +470,39 @@ exports.decorateHyper = (Hyper, { React }) => {
     };
 };
 
-exports.middleware = (store) => (next) => (action) => {
+exports.middleware = store => next => action => {
     const uids = store.getState().sessions.sessions;
 
     switch (action.type) {
-        case 'SESSION_SET_XTERM_TITLE':
+        case "SESSION_SET_XTERM_TITLE":
             pid = uids[action.uid].pid;
             break;
 
-        case 'SESSION_ADD':
+        case "SESSION_ADD":
             pid = action.pid;
             setCwd(pid);
+            setBalance();
+            setSavings();
             break;
 
-        case 'SESSION_ADD_DATA':
-            const { data } = action;
-            const enterKey = data.indexOf('\n') > 0;
+        case "SESSION_ADD_DATA":
+            const {
+                data
+            } = action;
+            const enterKey = data.indexOf("\n") > 0;
 
             if (enterKey) {
                 setCwd(pid, action);
+                setBalance();
+                setSavings();
             }
             break;
 
-        case 'SESSION_SET_ACTIVE':
+        case "SESSION_SET_ACTIVE":
             pid = uids[action.uid].pid;
             setCwd(pid);
+            setBalance();
+            setSavings();
             break;
     }
 
