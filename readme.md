@@ -1,10 +1,19 @@
-# hyper-statusline-revolut
+# hyper-statusline-extended
 
 Forked from ![hyper-statusline](https://github.com/henrikdahl/hyper-statusline) and edited to add Revolut statuses using the ![Revolut API by tducret](https://github.com/tducret/revolut-python).
 
-To use this, follow the below installation guide, but rename the `.env.example` file to `.env` and input both your Revolut token and the path to the Revolut CLI, or set these variables in system/user variables.
+To use this, follow the below installation guide, and add the following object to your `.hyper.js`:
 
-`npm i hyper-statusline-revolut`
+```
+    revolut: {
+        balanceCurrencies: ['EUR', 'GBP', 'USD'], // Can include 'EUR', 'GBP' and/or 'USD'
+        vaultCurrencies: ['EUR'], // Can include 'EUR', 'GBP' and/or 'USD'
+        REV_TOKEN: '<revToken>',
+        REV_API_PATH: '<pathToRevolutCLI>'
+    },
+```
+
+`npm i hyper-statusline-extended`
 
 ---
 
@@ -13,7 +22,6 @@ To use this, follow the below installation guide, but rename the `.env.example` 
 > Status Line Plugin for [Hyper](https://hyper.is). Shows clickable & useful information. Matches any theme.
 
 ![hyper-statusline](https://cloud.githubusercontent.com/assets/1430576/21891665/14d29070-d8d4-11e6-9e98-b12ed28be93a.png)
-
 
 ## Install
 
@@ -27,12 +35,12 @@ module.exports = {
 }
 ```
 
-
 ## Config
 
 Add following to `~/.hyper.js`
 
 ### Change Git Dirty Color
+
 Expected value is `CSS color`
 
 ```javascript
@@ -48,6 +56,7 @@ module.exports = {
 ```
 
 ### Change Git Ahead Color
+
 Expected value is `CSS color`
 
 ```javascript
@@ -63,6 +72,7 @@ module.exports = {
 ```
 
 ### Disable Footer Transparency
+
 Default value is set to `true`
 
 ```javascript
@@ -77,11 +87,9 @@ module.exports = {
 }
 ```
 
-
 ## Theme
 
-* [hyper-chesterish](https://github.com/henrikdahl/hyper-chesterish)
-
+- [hyper-chesterish](https://github.com/henrikdahl/hyper-chesterish)
 
 ## License
 

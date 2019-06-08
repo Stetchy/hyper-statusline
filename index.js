@@ -40,10 +40,19 @@ exports.decorateConfig = config => {
     const hyperStatusLine = Object.assign({
             footerTransparent: true,
             dirtyColor: configColors.lightYellow,
-            aheadColor: configColors.blue
+            aheadColor: configColors.blue,
         },
         config.hyperStatusLine
     );
+
+    const revolut = Object.assign({
+        revolut: {
+            balanceCurrencies: ['EUR'],
+            vaultCurrencies: ['EUR'],
+            REV_TOKEN: '',
+            REV_API_PATH: ''
+        },
+    }, config.revolut);
 
     return Object.assign({}, config, {
         css: `
@@ -150,8 +159,21 @@ exports.decorateConfig = config => {
 
 let pid;
 let cwd;
-let balance;
-let savings;
+let balance = new Set();
+let vaults = new Set();
+
+let balanceCurrencies = {
+    EUR: ['€', 3],
+    GBP: ['£', 5],
+    USD: ['$', 7]
+}
+
+let vaultCurrencies = {
+    EUR: ['€', 9],
+    GBP: ['£', 11],
+    USD: ['$', 13]
+}
+
 let git = {
     branch: "",
     remote: "",
@@ -159,22 +181,34 @@ let git = {
     ahead: 0
 };
 
-let token = process.env.REV_TOKEN;
-let apiPath = process.env.REV_API_PATH;
 const setBalance = () => {
+    let revConfig = config.getConfig().revolut;
+    let token = revConfig.REV_TOKEN;
+    let apiPath = revConfig.REV_API_PATH;
     exec(
         `cd ${apiPath} && python3 revolut_cli.py -l en --token=${token}`,
         (err, stdout) => {
-            balance = "Balance: €" + stdout.split(",")[3];
+            setTimeout(() => {
+                revConfig.balanceCurrencies.map((c) => {
+                    balance.add(`${c} balance: ${balanceCurrencies[c][0]}` + stdout.split(",")[balanceCurrencies[c][1]]);
+                })
+            }, 2000);
         }
     );
 };
 
-const setSavings = () => {
+const setVaults = () => {
+    let revConfig = config.getConfig().revolut;
+    let token = revConfig.REV_TOKEN;
+    let apiPath = revConfig.REV_API_PATH;
     exec(
         `cd ${apiPath} && python3 revolut_cli.py -l en --token=${token}`,
         (err, stdout) => {
-            savings = "Savings: €" + stdout.split(",")[9];
+            setTimeout(() => {
+                revConfig.vaultCurrencies.map((c) => {
+                    vaults.add(`${c} vault: ${vaultCurrencies[c][0]}` + stdout.split(",")[vaultCurrencies[c][1]])
+                })
+            }, 2000);
         }
     );
 };
@@ -320,7 +354,7 @@ const setGit = repo => {
 exports.decorateHyper = (Hyper, {
     React
 }) => {
-    return class extends React.PureComponent {
+    return class extends React.Component {
         constructor(props) {
             super(props);
 
@@ -330,8 +364,8 @@ exports.decorateHyper = (Hyper, {
                 remote: "",
                 dirty: 0,
                 ahead: 0,
-                balance: "",
-                savings: ""
+                balance: new Set(),
+                vaults: new Set()
             };
 
             this.handleCwdClick = this.handleCwdClick.bind(this);
@@ -370,25 +404,28 @@ exports.decorateHyper = (Hyper, {
                                     "div", {
                                         className: "component_component component_cwd"
                                     },
-                                    React.createElement(
-                                        "div", {
-                                            className: "component_item",
-                                            title: this.state.balance,
-                                            hidden: !this.state.balance
-                                        },
-                                        this.state.balance ? this.state.balance : ""
-                                    ),
-                                    React.createElement("div", {
-                                        className: "item_cws"
-                                    }),
-                                    React.createElement(
-                                        "div", {
-                                            className: "component_item",
-                                            title: this.state.savings,
-                                            hidden: !this.state.savings
-                                        },
-                                        this.state.savings ? this.state.savings : ""
-                                    ),
+                                    [...this.state.balance].map((b) => (React.createElement(
+                                            "div", {
+                                                className: "component_item",
+                                                title: b,
+                                                hidden: !b
+                                            },
+                                            b ? b : ""
+                                        )),
+                                        React.createElement("div", {
+                                            className: "item_cws"
+                                        })),
+                                    [...this.state.vaults].map((v) => (React.createElement(
+                                            "div", {
+                                                className: "component_item",
+                                                title: v,
+                                                hidden: !v
+                                            },
+                                            v ? v : ""
+                                        )),
+                                        React.createElement("div", {
+                                            className: "item_cws"
+                                        })),
                                     React.createElement("div", {
                                         className: "item_cws"
                                     }),
@@ -450,7 +487,18 @@ exports.decorateHyper = (Hyper, {
             );
         }
 
+        getInfo() {
+            setBalance();
+            setVaults();
+            this.setState({
+                balance: balance,
+                vaults: vaults
+            })
+        }
+
         componentDidMount() {
+            this.getInfo();
+            this.interval2 = setInterval(() => this.getInfo(), 200000);
             this.interval = setInterval(() => {
                 this.setState({
                     cwd: cwd,
@@ -458,14 +506,13 @@ exports.decorateHyper = (Hyper, {
                     remote: git.remote,
                     dirty: git.dirty,
                     ahead: git.ahead,
-                    balance: balance,
-                    savings: savings
                 });
             }, 100);
         }
 
         componentWillUnmount() {
             clearInterval(this.interval);
+            clearInterval(this.interval2);
         }
     };
 };
@@ -481,8 +528,6 @@ exports.middleware = store => next => action => {
         case "SESSION_ADD":
             pid = action.pid;
             setCwd(pid);
-            setBalance();
-            setSavings();
             break;
 
         case "SESSION_ADD_DATA":
@@ -493,16 +538,12 @@ exports.middleware = store => next => action => {
 
             if (enterKey) {
                 setCwd(pid, action);
-                setBalance();
-                setSavings();
             }
             break;
 
         case "SESSION_SET_ACTIVE":
             pid = uids[action.uid].pid;
             setCwd(pid);
-            setBalance();
-            setSavings();
             break;
     }
 
