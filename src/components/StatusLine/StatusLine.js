@@ -340,6 +340,15 @@ export default class StatusLine extends Component {
               hidden={!this.state.cwd}
               cwd={this.state.cwd}
             />
+            <div
+              style={{
+                margin: "auto",
+                marginLeft: "3px",
+                marginRight: "3px"
+              }}
+            >
+              &nbsp;
+            </div>
             <ComponentC type="git">
               <Branch
                 title={this.state.remote}

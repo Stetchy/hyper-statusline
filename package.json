@@ -1,6 +1,6 @@
 {
   "name": "hyper-statusline-extended",
-  "version": "1.1.0",
+  "version": "1.1.3",
   "description": "Status Line Plugin for Hyper forked to include Revolut statuses.",
   "main": "dist/index.js",
   "license": "MIT",
@@ -15,7 +15,8 @@
     "url": "https://github.com/stetchy"
   }],
   "files": [
-    "dist/index.js"
+    "dist/index.js",
+    "resources/"
   ],
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack"
