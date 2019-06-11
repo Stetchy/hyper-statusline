@@ -82,4 +82,4 @@ Default value is set to `true`
 
 ## Extra
 
-- [hyper-chesterish](https://github.com/henrikdahl/hyper-chesterish)
+- [Theme: hyper-chesterish](https://github.com/henrikdahl/hyper-chesterish)
