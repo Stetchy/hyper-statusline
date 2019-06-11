@@ -1,8 +1,8 @@
 {
   "name": "hyper-statusline-extended",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Status Line Plugin for Hyper forked to include Revolut statuses.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "repository": "stetchy/hyper-statusline-extended",
   "author": {
@@ -15,8 +15,11 @@
     "url": "https://github.com/stetchy"
   }],
   "files": [
-    "index.js"
+    "dist/index.js"
   ],
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack"
+  },
   "keywords": [
     "hyper",
     "hyper-theme",
@@ -28,7 +31,25 @@
   ],
   "dependencies": {
     "after-all-results": "^2.0.0",
+    "axios": "^0.19.0",
     "color": "^2.0.0",
-    "tildify": "^1.2.0"
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "systeminformation": "^4.9.0",
+    "tildify": "^1.2.0",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.6",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "cross-env": "^5.2.0",
+    "file-loader": "^4.0.0",
+    "url-loader": "^2.0.0",
+    "webpack": "^4.33.0",
+    "webpack-cli": "^3.3.3",
+    "webpack-dev-server": "^3.7.1"
   }
 }
