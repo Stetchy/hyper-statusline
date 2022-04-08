@@ -34,13 +34,28 @@ Add the following to your Hyper config's config object.
 If you have more than one balance/vault set, you can then cycle through them by clicking the component on the status line.
 
 ```js
-revolut: {
-        balanceCurrencies: [], // Can include 'EUR', 'USD', and/or 'GBP'
-        vaultCurrencies: [], // Can include 'EUR', 'USD', and/or 'GBP'
-        REV_TOKEN: '<revolutToken>',
-        REV_API_PATH: '<pathToRevolutAPI>'
+hyperStatusLine: {
+    revolut: {
+            balanceCurrencies: [], // Can include 'EUR', 'USD', and/or 'GBP'
+            vaultCurrencies: [], // Can include 'EUR', 'USD', and/or 'GBP'
+            REV_TOKEN: '<revolutToken>',
+            REV_API_PATH: '<pathToRevolutAPI>'
+    }
 }
 
+```
+
+### Change default file manager
+
+Provide the name of the app and any arguments
+
+```js
+    hyperStatusLine: {
+        fileSystemExplorerConfig: { // Optional
+            appName: "ForkLift", // Must exist in Mac Applications folder
+            additionalParams: "" // Optional
+        }
+    }
 ```
 
 ### Change Git Dirty Color
