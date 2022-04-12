@@ -340,12 +340,12 @@ export default class StatusLine extends Component {
   }
 
   render() {
-    
+
     const { config } = this.props;
     const hslConfig = config.getConfig().hyperStatusLine;
     const revConfig = hslConfig && hslConfig.revolut;
     let revToken = revConfig.REV_TOKEN;
-    
+
     return (
       <React.Fragment>
         <Footer>
