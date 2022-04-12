@@ -244,7 +244,15 @@ export default class StatusLine extends Component {
   }
 
   handleCwdClick(event) {
-    shell.openExternal("file://" + this.state.cwd);
+    const { config } = this.props;
+    const hslConfig = config.getConfig().hyperStatusLine;
+    const fsConfig = hslConfig && hslConfig.fileSystemExplorerConfig;
+    let params = fsConfig && fsConfig.additionalParams || '';
+    if (fsConfig.appName) {
+      exec(`open -a ${fsConfig.appName} ${this.state.cwd} ${params}`);
+    } else {
+      shell.openExternal("file://" + this.state.cwd);
+    }
   }
 
   handleBranchClick(event) {
@@ -265,8 +273,9 @@ export default class StatusLine extends Component {
   }
 
   setBalance() {
-    let { config } = this.props;
-    let revConfig = config.getConfig().revolut;
+    const { config } = this.props;
+    const hslConfig = config.getConfig().hyperStatusLine;
+    const revConfig = hslConfig && hslConfig.revolut;
     let token = revConfig.REV_TOKEN;
     let apiPath = revConfig.REV_API_PATH;
     let balance = new Set();
@@ -287,8 +296,9 @@ export default class StatusLine extends Component {
   }
 
   setVaults() {
-    let { config } = this.props;
-    let revConfig = config.getConfig().revolut;
+    const { config } = this.props;
+    const hslConfig = config.getConfig().hyperStatusLine;
+    const revConfig = hslConfig && hslConfig.revolut;
     let token = revConfig.REV_TOKEN;
     let apiPath = revConfig.REV_API_PATH;
     let vaults = new Set();
@@ -330,6 +340,12 @@ export default class StatusLine extends Component {
   }
 
   render() {
+
+    const { config } = this.props;
+    const hslConfig = config.getConfig().hyperStatusLine;
+    const revConfig = hslConfig && hslConfig.revolut;
+    let revToken = revConfig.REV_TOKEN;
+
     return (
       <React.Fragment>
         <Footer>
@@ -373,7 +389,7 @@ export default class StatusLine extends Component {
             </ComponentC>
           </FooterGroupOverflow>
           <FooterGroup>
-            <ComponentC type="cwd rev">
+            {revToken && <ComponentC type="cwd rev">
               <img
                 src={revolut}
                 style={{
@@ -391,7 +407,7 @@ export default class StatusLine extends Component {
                 }}
               />
               <Revolut info={this.state.vaults} />
-            </ComponentC>
+            </ComponentC>}
             <ComponentType type="item">
               <img
                 src={internet}
